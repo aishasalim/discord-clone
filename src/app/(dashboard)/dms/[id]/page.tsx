@@ -167,15 +167,29 @@ function MessageInput({
     if (!file) return;
     setFile(file);
     setUploading(true);
-    const url = await generateUploadUrl();
-    const res = await fetch(url, {
-      method: "POST",
-      body: file,
-    });
-    const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
-    setAtachment(storageId);
-    setUploading(false);
-    setFile(undefined);
+
+    try {
+      const url = await generateUploadUrl();
+      const res = await fetch(url, {
+        method: "POST",
+        body: file,
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const { storageId } = (await res.json()) as { storageId: Id<"_storage"> };
+      setAtachment(storageId);
+      toast.success("Image uploaded successfully!", {
+        duration: 1000,
+      });
+    } catch (error) {
+      console.error("Image upload failed:", error);
+      toast.error("Failed to upload image. Please try again.");
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleTyping = () => {
@@ -206,13 +220,20 @@ function MessageInput({
       await sendMessage({ directMessage, attachment, content });
       setContent("");
       setAtachment(undefined);
+      setFile(undefined); // Clear the file state after sending the message
       setTyping(false);
+
       if (typingIntervalRef.current) {
         clearInterval(typingIntervalRef.current);
       }
+
       removeTypingIndicator({ directMessage });
+      toast.success("Message sent successfully!", {
+        duration: 1000,
+      });
     } catch (error) {
-      toast.error("Failed to send message");
+      console.error("Failed to send message:", error);
+      toast.error("Failed to send message. Please try again.");
     }
   };
 

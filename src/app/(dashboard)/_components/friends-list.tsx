@@ -1,3 +1,5 @@
+"use client";
+
 import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -9,6 +11,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function FriendsListEmpty({ children }: { children: React.ReactNode }) {
   return (
@@ -40,7 +44,7 @@ export function PendingFriendsList() {
             title="Accept Friend"
             className=" hover:bg-green-100"
             icon={<CheckIcon />}
-            onclick={() =>
+            onClick={() =>
               updateStatus({
                 id: friend._id,
                 status: "accepted",
@@ -52,7 +56,7 @@ export function PendingFriendsList() {
             title="Reject Friend"
             className=" hover:bg-red-100"
             icon={<XIcon />}
-            onclick={() =>
+            onClick={() =>
               updateStatus({
                 id: friend._id,
                 status: "rejected",
@@ -67,6 +71,25 @@ export function PendingFriendsList() {
 export function AcceptedFriendsList() {
   const friends = useQuery(api.functions.friends.listAccepted);
   const updateStatus = useMutation(api.functions.friends.updateStatus);
+  const createDM = useMutation(api.functions.dms.create);
+  const [isMounted, setIsMounted] = useState(false);
+  const router = useRouter();
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
+
+  const handleStartDM = async (username: string) => {
+    try {
+      const dmId = await createDM({ username });
+      router.push(`/dms/${dmId}`);
+    } catch (error) {
+      console.error("Failed to start DM:", error);
+    }
+  };
+
   return (
     <div className="flex flex-col divide-y">
       <h2 className="text-xs font-medium text-muted-foreground p-2.5">
@@ -86,13 +109,13 @@ export function AcceptedFriendsList() {
             title="Start DM"
             className=""
             icon={<MessageCircleIcon />}
-            onclick={() => {}}
+            onClick={() => handleStartDM(friend.user.username)}
           />
           <IconButton
             title="Remove Friend"
             className=" hover:bg-red-100"
             icon={<XIcon />}
-            onclick={() =>
+            onClick={() =>
               updateStatus({
                 id: friend._id,
                 status: "rejected",
@@ -109,12 +132,12 @@ function IconButton({
   title,
   className,
   icon,
-  onclick,
+  onClick,
 }: {
   title: string;
   className?: string;
   icon: React.ReactNode;
-  onclick: () => void;
+  onClick: () => void;
 }) {
   return (
     <Tooltip>
@@ -123,7 +146,7 @@ function IconButton({
           variant="outline"
           className={cn("rounded-full", className)}
           size="icon"
-          onClick={onclick}
+          onClick={onClick}
         >
           {icon} <span className="sr-only">{title}</span>
         </Button>
