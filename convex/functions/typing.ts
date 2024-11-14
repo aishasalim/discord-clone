@@ -1,16 +1,21 @@
 import { v } from "convex/values";
-import { authenticatedMutation, authenticatedQuery } from "./helpers";
+import {
+  authenticatedMutation,
+  authenticatedQuery,
+  assertMember,
+} from "./helpers";
 
 export const upsert = authenticatedMutation({
   args: {
-    directMessage: v.id("directMessages"),
+    dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
-  handler: async (ctx, { directMessage }) => {
+  handler: async (ctx, { dmOrChannelId }) => {
+    await assertMember(ctx, dmOrChannelId);
     // check if dm already exists
     const existing = await ctx.db
       .query("typingIndicators")
-      .withIndex("by_user_direct_message", (q) =>
-        q.eq("user", ctx.user._id).eq("directMessage", directMessage)
+      .withIndex("by_user_dmOrChannelId", (q) =>
+        q.eq("user", ctx.user._id).eq("dmOrChannelId", dmOrChannelId)
       )
       .unique();
     const expiresAt = Date.now() + 1000 * 5;
@@ -18,14 +23,14 @@ export const upsert = authenticatedMutation({
     if (existing) {
       await ctx.db.patch(existing._id, {
         user: ctx.user._id,
-        directMessage,
+        dmOrChannelId,
         expiresAt,
       });
       // create it if it doesn't exist
     } else {
       await ctx.db.insert("typingIndicators", {
         user: ctx.user._id,
-        directMessage,
+        dmOrChannelId,
         expiresAt,
       });
     }
@@ -34,14 +39,16 @@ export const upsert = authenticatedMutation({
 
 export const list = authenticatedQuery({
   args: {
-    directMessage: v.id("directMessages"),
+    dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
-  handler: async (ctx, { directMessage }) => {
+  handler: async (ctx, { dmOrChannelId }) => {
+    await assertMember(ctx, dmOrChannelId);
+
     const now = Date.now();
     const typingIndicators = await ctx.db
       .query("typingIndicators")
-      .withIndex("by_direct_message", (q) =>
-        q.eq("directMessage", directMessage)
+      .withIndex("by_dmOrChannelId", (q) =>
+        q.eq("dmOrChannelId", dmOrChannelId)
       )
       .filter((q) =>
         q.and(
@@ -65,13 +72,15 @@ export const list = authenticatedQuery({
 
 export const remove = authenticatedMutation({
   args: {
-    directMessage: v.id("directMessages"),
+    dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
-  handler: async (ctx, { directMessage }) => {
+  handler: async (ctx, { dmOrChannelId }) => {
+    await assertMember(ctx, dmOrChannelId);
+
     const existing = await ctx.db
       .query("typingIndicators")
-      .withIndex("by_user_direct_message", (q) =>
-        q.eq("user", ctx.user._id).eq("directMessage", directMessage)
+      .withIndex("by_user_dmOrChannelId", (q) =>
+        q.eq("user", ctx.user._id).eq("dmOrChannelId", dmOrChannelId)
       )
       .unique();
     if (existing) {
