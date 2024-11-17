@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import {
   authenticatedMutation,
   authenticatedQuery,
-  assertMember,
+  assertChannelMember,
 } from "./helpers";
 
 export const upsert = authenticatedMutation({
@@ -10,7 +10,7 @@ export const upsert = authenticatedMutation({
     dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
   handler: async (ctx, { dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
     // check if dm already exists
     const existing = await ctx.db
       .query("typingIndicators")
@@ -42,7 +42,7 @@ export const list = authenticatedQuery({
     dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
   handler: async (ctx, { dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
 
     const now = Date.now();
     const typingIndicators = await ctx.db
@@ -75,7 +75,7 @@ export const remove = authenticatedMutation({
     dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
   handler: async (ctx, { dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
 
     const existing = await ctx.db
       .query("typingIndicators")

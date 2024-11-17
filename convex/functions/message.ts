@@ -3,7 +3,7 @@ import { convexToJson, v } from "convex/values";
 import {
   authenticatedMutation,
   authenticatedQuery,
-  assertMember,
+  assertChannelMember,
 } from "./helpers";
 
 export const list = authenticatedQuery({
@@ -11,7 +11,7 @@ export const list = authenticatedQuery({
     dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
   handler: async (ctx, { dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
 
     const messages = await ctx.db
       .query("messages")
@@ -43,7 +43,7 @@ export const create = authenticatedMutation({
     dmOrChannelId: v.union(v.id("channels"), v.id("directMessages")),
   },
   handler: async (ctx, { content, attachment, dmOrChannelId }) => {
-    await assertMember(ctx, dmOrChannelId);
+    await assertChannelMember(ctx, dmOrChannelId);
     await ctx.db.insert("messages", {
       content,
       attachment,

@@ -18,7 +18,7 @@ import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { api } from "../../../../convex/_generated/api";
+import { api } from "../../../../../convex/_generated/api";
 
 export const NewDirectMessage = () => {
   const [open, setOpen] = useState(false);

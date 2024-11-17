@@ -47,7 +47,9 @@ export default defineSchema({
   channels: defineTable({
     name: v.string(),
     serverId: v.id("servers"),
-  }).index("by_serverId", ["serverId"]),
+  })
+    .index("by_serverId", ["serverId"])
+    .index("by_serverId_name", ["serverId", "name"]),
 
   // server members
   serverMembers: defineTable({
