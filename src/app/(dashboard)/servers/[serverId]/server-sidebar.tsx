@@ -9,6 +9,7 @@ import {
   SidebarMenuButton,
   Sidebar,
   SidebarMenuAction,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Id } from "../../../../../convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -19,6 +20,7 @@ import { CreateChannel } from "./create-channel";
 import { TrashIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Voice } from "./voice";
 
 export function ServerSidebar({ id }: { id: Id<"servers"> }) {
   const pathname = usePathname();
@@ -76,6 +78,17 @@ export function ServerSidebar({ id }: { id: Id<"servers"> }) {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <Voice serverId={id} />
+              </SidebarMenuItem>
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarFooter>
     </Sidebar>
   );
 }
