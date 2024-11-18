@@ -17,6 +17,7 @@ import type * as functions_channel from "../functions/channel.js";
 import type * as functions_dms from "../functions/dms.js";
 import type * as functions_friends from "../functions/friends.js";
 import type * as functions_helpers from "../functions/helpers.js";
+import type * as functions_invite from "../functions/invite.js";
 import type * as functions_message from "../functions/message.js";
 import type * as functions_server from "../functions/server.js";
 import type * as functions_storage from "../functions/storage.js";
@@ -37,6 +38,7 @@ declare const fullApi: ApiFromModules<{
   "functions/dms": typeof functions_dms;
   "functions/friends": typeof functions_friends;
   "functions/helpers": typeof functions_helpers;
+  "functions/invite": typeof functions_invite;
   "functions/message": typeof functions_message;
   "functions/server": typeof functions_server;
   "functions/storage": typeof functions_storage;
